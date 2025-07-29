@@ -1,0 +1,47 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class IsUser
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
+     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
+     */
+    public function handle(Request $request, Closure $next)
+    {
+        // if (Auth::user()->role != "USR-P") {
+        //     return redirect('/');
+        // }
+        // return $next($request); 
+        // if (Auth::user() && Auth::user()->role == 'USR-P' || Auth::user()->role == 'USR-V') {
+        //     return $next($request);
+        // } elseif (Auth::user() && Auth::user()->role == 'ADMIN') {
+        //     return redirect('admin/dashboard');
+        // } else {
+        //     return redirect('/');
+        // }
+        $user = Auth::user();
+
+        if ($user && ($user->role == 'USR-P' || $user->role == 'USR-V')) {
+            
+            if (!$user->email_verified_at) {
+                return redirect('login')->with('message', 'Silakan verifikasi email terlebih dahulu.');
+            }
+
+            return $next($request);
+        } 
+        elseif ($user && $user->role == 'ADMIN') {
+            return redirect('admin/dashboard');
+        } 
+        
+        return redirect('/');
+    }
+}
